@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Client {
+  id           String   @id @default(cuid())
+  name         String
+  email        String
+  company      String?
+  token        String   @unique
+  tier         Int
+  totalCredits Int      @default(0)
+  startDate    DateTime
+  endDate      DateTime
+  createdAt    DateTime @default(now())
+
+  transactions CreditTransaction[]
+}
+
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  clientId    String
+  description String
+  creditsUsed Int
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
