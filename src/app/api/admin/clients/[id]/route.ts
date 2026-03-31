@@ -12,7 +12,10 @@ export async function GET(
   const { id } = await params;
   const client = await prisma.client.findUnique({
     where: { id },
-    include: { transactions: { orderBy: { date: "desc" } } },
+    include: {
+      transactions: { orderBy: { date: "desc" } },
+      milestones: { orderBy: { dueDate: "asc" } },
+    },
   });
 
   if (!client) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -28,7 +31,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const { name, email, company, tier, totalCredits, startDate, endDate } = body;
+  const { name, email, company, totalCredits, startDate, endDate, gracePeriodDays } = body;
 
   const client = await prisma.client.update({
     where: { id },
@@ -36,12 +39,15 @@ export async function PATCH(
       ...(name !== undefined && { name }),
       ...(email !== undefined && { email }),
       ...(company !== undefined && { company }),
-      ...(tier !== undefined && { tier: Number(tier) }),
       ...(totalCredits !== undefined && { totalCredits: Number(totalCredits) }),
       ...(startDate !== undefined && { startDate: new Date(startDate) }),
       ...(endDate !== undefined && { endDate: new Date(endDate) }),
+      ...(gracePeriodDays !== undefined && { gracePeriodDays: Number(gracePeriodDays) }),
     },
-    include: { transactions: { orderBy: { date: "desc" } } },
+    include: {
+      transactions: { orderBy: { date: "desc" } },
+      milestones: { orderBy: { dueDate: "asc" } },
+    },
   });
 
   return NextResponse.json(client);

@@ -1,79 +1,98 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-
-function creditColor(remaining: number, total: number) {
-  if (total === 0) return "bg-slate-100 text-slate-600";
-  const pct = remaining / total;
-  if (pct > 0.5) return "bg-green-100 text-green-700";
-  if (pct > 0.2) return "bg-yellow-100 text-yellow-700";
-  return "bg-red-100 text-red-700";
-}
+import { getGracePeriodEnd, getStatus } from "@/lib/credits";
+import { StatusBadge } from "@/components/StatusBadge";
+import { CreditBar } from "@/components/CreditBar";
 
 export default async function AdminDashboardPage() {
   const clients = await prisma.client.findMany({
-    include: { transactions: true },
-    orderBy: { createdAt: "desc" },
+    include: {
+      transactions: true,
+      milestones: { orderBy: { dueDate: "asc" } },
+    },
+    orderBy: { createdAt: "asc" },
   });
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Clients</h1>
-        <p className="text-slate-500 text-sm mt-1">{clients.length} client{clients.length !== 1 ? "s" : ""}</p>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Client Dashboard</h1>
+        <p className="text-gray-500 text-sm mt-1">
+          {clients.length} active client{clients.length !== 1 ? "s" : ""}
+        </p>
       </div>
 
       {clients.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-          <p className="text-slate-400 mb-4">No clients yet.</p>
-          <Link href="/admin/clients/new" className="text-teal-600 font-medium hover:underline">
-            Add your first client →
-          </Link>
+        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+          <p className="text-gray-400 mb-4">No clients yet.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="text-left px-6 py-3 font-medium text-slate-600">Client</th>
-                <th className="text-left px-6 py-3 font-medium text-slate-600">Plan</th>
-                <th className="text-right px-6 py-3 font-medium text-slate-600">Credits</th>
-                <th className="text-right px-6 py-3 font-medium text-slate-600">Remaining</th>
-                <th className="text-right px-6 py-3 font-medium text-slate-600">Program End</th>
-                <th className="px-6 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {clients.map((client) => {
-                const used = client.transactions.reduce((s, t) => s + t.creditsUsed, 0);
-                const remaining = client.totalCredits - used;
-                return (
-                  <tr key={client.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-slate-900">{client.name}</div>
-                      {client.company && <div className="text-slate-400 text-xs">{client.company}</div>}
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">{client.tier} credits</td>
-                    <td className="px-6 py-4 text-right text-slate-600">
-                      {used} / {client.totalCredits}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${creditColor(remaining, client.totalCredits)}`}>
-                        {remaining} left
+        <div className="grid gap-5 sm:grid-cols-1 lg:grid-cols-2">
+          {clients.map((client) => {
+            const used = client.transactions.reduce(
+              (s, t) => s + t.creditsUsed,
+              0
+            );
+            const status = getStatus(
+              new Date(client.endDate),
+              client.gracePeriodDays
+            );
+            const gracePeriodEnd = getGracePeriodEnd(
+              new Date(client.endDate),
+              client.gracePeriodDays
+            );
+            const unpaidCount = client.milestones.filter(
+              (m) => !m.paidDate
+            ).length;
+
+            return (
+              <Link
+                key={client.id}
+                href={`/admin/clients/${client.id}`}
+                className="block bg-white rounded-2xl border border-gray-200 p-6 hover:border-brand/50 hover:shadow-md transition-all group"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h2 className="font-bold text-gray-900 text-lg group-hover:text-brand transition-colors">
+                      {client.company}
+                    </h2>
+                    <p className="text-gray-500 text-sm">{client.name}</p>
+                  </div>
+                  <StatusBadge status={status} />
+                </div>
+
+                <div className="mb-4">
+                  <CreditBar used={used} total={client.totalCredits} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 border-t border-gray-100 pt-4">
+                  <div>
+                    <span className="text-xs text-gray-400 block">Subscription ends</span>
+                    {new Date(client.endDate).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400 block">Grace period ends</span>
+                    {gracePeriodEnd.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </div>
+                  {unpaidCount > 0 && (
+                    <div className="col-span-2">
+                      <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-medium">
+                        {unpaidCount} payment{unpaidCount !== 1 ? "s" : ""} pending
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-right text-slate-500">
-                      {new Date(client.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link href={`/admin/clients/${client.id}`} className="text-teal-600 hover:underline font-medium">
-                        View →
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

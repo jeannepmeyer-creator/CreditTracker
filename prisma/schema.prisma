@@ -7,18 +7,19 @@ datasource db {
 }
 
 model Client {
-  id           String   @id @default(cuid())
-  name         String
-  email        String
-  company      String?
-  token        String   @unique
-  tier         Int
-  totalCredits Int      @default(0)
-  startDate    DateTime
-  endDate      DateTime
-  createdAt    DateTime @default(now())
+  id              String   @id @default(cuid())
+  name            String
+  company         String
+  email           String
+  token           String   @unique
+  totalCredits    Int
+  startDate       DateTime
+  endDate         DateTime
+  gracePeriodDays Int      @default(90)
+  createdAt       DateTime @default(now())
 
   transactions CreditTransaction[]
+  milestones   PaymentMilestone[]
 }
 
 model CreditTransaction {
@@ -28,6 +29,19 @@ model CreditTransaction {
   creditsUsed Int
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model PaymentMilestone {
+  id        String    @id @default(cuid())
+  clientId  String
+  label     String
+  amount    Float
+  dueDate   DateTime
+  paidDate  DateTime?
+  notes     String?
+  createdAt DateTime  @default(now())
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 }

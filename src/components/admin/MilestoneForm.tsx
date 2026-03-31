@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function TransactionForm({ clientId }: { clientId: string }) {
+export default function MilestoneForm({ clientId }: { clientId: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const today = new Date().toISOString().split("T")[0];
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -15,13 +14,14 @@ export default function TransactionForm({ clientId }: { clientId: string }) {
     setError("");
 
     const fd = new FormData(e.currentTarget);
-    const res = await fetch(`/api/admin/clients/${clientId}/transactions`, {
+    const res = await fetch(`/api/admin/clients/${clientId}/milestones`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        description: fd.get("description"),
-        creditsUsed: Number(fd.get("creditsUsed")),
-        date: fd.get("date"),
+        label: fd.get("label"),
+        amount: Number(fd.get("amount")),
+        dueDate: fd.get("dueDate"),
+        notes: fd.get("notes") || null,
       }),
     });
 
@@ -29,46 +29,46 @@ export default function TransactionForm({ clientId }: { clientId: string }) {
       (e.target as HTMLFormElement).reset();
       router.refresh();
     } else {
-      const data = await res.json();
-      setError(data.error ?? "Something went wrong");
+      setError("Failed to add milestone.");
     }
     setLoading(false);
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-3 items-end flex-wrap">
-      <div className="flex-1 min-w-48">
+      <div className="flex-1 min-w-36">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Description *
+          Label *
         </label>
         <input
-          name="description"
+          name="label"
           required
-          placeholder="e.g. LinkedIn strategy call, media training"
+          placeholder="e.g. Installment 2"
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
         />
       </div>
       <div className="w-28">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Credits *
+          Amount ($) *
         </label>
         <input
-          name="creditsUsed"
+          name="amount"
           type="number"
-          min={1}
-          defaultValue={1}
+          min={0}
+          step="0.01"
           required
+          placeholder="2200"
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
         />
       </div>
       <div className="w-40">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Date
+          Due Date *
         </label>
         <input
-          name="date"
+          name="dueDate"
           type="date"
-          defaultValue={today}
+          required
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
         />
       </div>
@@ -79,7 +79,7 @@ export default function TransactionForm({ clientId }: { clientId: string }) {
           disabled={loading}
           className="bg-brand hover:bg-brand-dark text-white px-5 py-2 rounded-lg font-semibold text-sm disabled:opacity-50 transition-colors"
         >
-          {loading ? "Logging…" : "Log Usage"}
+          {loading ? "Adding…" : "Add Milestone"}
         </button>
       </div>
     </form>

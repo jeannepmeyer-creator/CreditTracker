@@ -8,8 +8,11 @@ export async function GET(request: NextRequest) {
   if (denied) return denied;
 
   const clients = await prisma.client.findMany({
-    include: { transactions: true },
-    orderBy: { createdAt: "desc" },
+    include: {
+      transactions: true,
+      milestones: { orderBy: { dueDate: "asc" } },
+    },
+    orderBy: { createdAt: "asc" },
   });
 
   return NextResponse.json(clients);
@@ -20,9 +23,9 @@ export async function POST(request: NextRequest) {
   if (denied) return denied;
 
   const body = await request.json();
-  const { name, email, company, tier, totalCredits, startDate, endDate } = body;
+  const { name, email, company, totalCredits, startDate, endDate, gracePeriodDays } = body;
 
-  if (!name || !email || !tier || !startDate || !endDate) {
+  if (!name || !email || !company || !totalCredits || !startDate || !endDate) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -30,12 +33,12 @@ export async function POST(request: NextRequest) {
     data: {
       name,
       email,
-      company: company ?? null,
+      company,
       token: generateClientToken(),
-      tier: Number(tier),
       totalCredits: Number(totalCredits),
       startDate: new Date(startDate),
       endDate: new Date(endDate),
+      gracePeriodDays: gracePeriodDays !== undefined ? Number(gracePeriodDays) : 90,
     },
   });
 

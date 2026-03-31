@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { isValidSession } from "@/lib/auth";
 import LogoutButton from "@/components/admin/LogoutButton";
+import { AuthenticIntelLogo } from "@/components/Logo";
 
 export default async function AdminLayout({
   children,
@@ -16,16 +17,24 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <div>
-          <a href="/admin" className="text-lg font-bold text-slate-900 hover:text-teal-700 transition-colors">
-            Authentic Intel
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <a href="/admin" className="flex items-center gap-3 group">
+            <AuthenticIntelLogo className="h-8 w-auto" />
+            <span className="text-sm text-gray-400 font-medium group-hover:text-brand transition-colors">
+              Credit Tracker
+            </span>
           </a>
-          <span className="text-slate-400 text-sm ml-2">Credit Tracker</span>
         </div>
         <div className="flex items-center gap-4">
-          <a href="/admin/clients/new" className="text-sm bg-teal-600 text-white px-4 py-1.5 rounded-lg hover:bg-teal-700 transition-colors font-medium">
+          <span className="text-xs bg-brand/10 text-brand-dark px-2.5 py-1 rounded-full font-semibold">
+            Admin
+          </span>
+          <a
+            href="/admin/clients/new"
+            className="text-sm bg-brand hover:bg-brand-dark text-white px-4 py-1.5 rounded-lg font-semibold transition-colors"
+          >
             + New Client
           </a>
           <LogoutButton />

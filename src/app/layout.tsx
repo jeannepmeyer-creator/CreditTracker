@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Authentic Intel – Credit Tracker",
-  description: "Track your On-Call Subscription credits",
+  title: "Authentic Intelligence – Credit Tracker",
+  description: "On-Call Subscription credit tracker for Authentic Intelligence clients",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased font-sans">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
