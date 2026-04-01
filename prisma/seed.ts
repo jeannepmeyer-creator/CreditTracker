@@ -3,12 +3,11 @@ import * as dotenvLocal from "dotenv";
 dotenvLocal.config({ path: ".env.local", override: true });
 
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { v4 as uuidv4 } from "uuid";
 
-const dbUrl = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
-const adapter = new PrismaBetterSqlite3({ url: dbUrl });
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({
+  datasourceUrl: process.env.DATABASE_URL,
+});
 
 async function main() {
   // Clear existing data
