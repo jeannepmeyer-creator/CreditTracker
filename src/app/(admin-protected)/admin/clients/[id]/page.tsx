@@ -132,7 +132,7 @@ export default async function ClientDetailPage({
         <div className="mb-5">
           <MilestoneList
             clientId={client.id}
-            milestones={client.milestones.map((m) => ({
+            milestones={client.milestones.map((m: { id: string; label: string; amount: number; dueDate: Date; paidDate: Date | null; notes: string | null }) => ({
               id: m.id,
               label: m.label,
               amount: m.amount,
@@ -163,7 +163,7 @@ export default async function ClientDetailPage({
         </h2>
         <TransactionList
           clientId={client.id}
-          transactions={client.transactions.map((t) => ({
+          transactions={client.transactions.map((t: { id: string; description: string; creditsUsed: number; date: Date }) => ({
             id: t.id,
             description: t.description,
             creditsUsed: t.creditsUsed,
