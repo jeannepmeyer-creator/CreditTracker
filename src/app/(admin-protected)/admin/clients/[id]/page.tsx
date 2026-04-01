@@ -26,7 +26,7 @@ export default async function ClientDetailPage({
 
   if (!client) notFound();
 
-  const used = client.transactions.reduce((s, t) => s + t.creditsUsed, 0);
+  const used = client.transactions.reduce((s: number, t) => s + t.creditsUsed, 0);
   const remaining = client.totalCredits - used;
   const status = getStatus(new Date(client.endDate), client.gracePeriodDays);
   const gracePeriodEnd = getGracePeriodEnd(
