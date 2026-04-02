@@ -1,8 +1,3 @@
-import { defineConfig } from "prisma/config";
-
-export default defineConfig({
-  schema: "prisma/schema.prisma",
-  datasource: {
-    url: process.env["DATABASE_URL"] ?? "postgresql://placeholder",
-  },
-});
+// prisma.config.ts is not needed for Prisma 6
+// DATABASE_URL is read from env via schema.prisma
+export {};
