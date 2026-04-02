@@ -68,7 +68,7 @@ export default function ClientEditForm({ client }: Props) {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input name="email" type="email" defaultValue={client.email} required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand" />
+          <input name="email" type="text" defaultValue={client.email} required placeholder="email@example.com" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
