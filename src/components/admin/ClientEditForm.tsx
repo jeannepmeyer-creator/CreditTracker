@@ -13,6 +13,7 @@ type Props = {
     startDate: string;
     endDate: string;
     gracePeriodDays: number;
+    token: string;
   };
 };
 
@@ -40,6 +41,7 @@ export default function ClientEditForm({ client }: Props) {
         startDate: fd.get("startDate"),
         endDate: fd.get("endDate"),
         gracePeriodDays: Number(fd.get("gracePeriodDays")),
+        token: fd.get("token"),
       }),
     });
 
@@ -89,6 +91,10 @@ export default function ClientEditForm({ client }: Props) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Grace Period (days)</label>
           <input name="gracePeriodDays" type="number" min={0} defaultValue={client.gracePeriodDays} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand" />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Portal URL Slug <span className="text-gray-400 font-normal">(e.g. lgads → /client/lgads)</span></label>
+          <input name="token" defaultValue={client.token} required placeholder="e.g. lgads or ktg-portal-2026" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand font-mono" />
         </div>
       </div>
 
