@@ -31,7 +31,15 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const { name, email, company, totalCredits, startDate, endDate, gracePeriodDays } = body;
+  const { name, email, company, totalCredits, startDate, endDate, gracePeriodDays, token } = body;
+
+  if (token !== undefined) {
+    const slug = token.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-");
+    const existing = await prisma.client.findUnique({ where: { token: slug } });
+    if (existing && existing.id !== id) {
+      return NextResponse.json({ error: "That URL slug is already in use" }, { status: 409 });
+    }
+  }
 
   const client = await prisma.client.update({
     where: { id },
@@ -43,6 +51,7 @@ export async function PATCH(
       ...(startDate !== undefined && { startDate: new Date(startDate) }),
       ...(endDate !== undefined && { endDate: new Date(endDate) }),
       ...(gracePeriodDays !== undefined && { gracePeriodDays: Number(gracePeriodDays) }),
+      ...(token !== undefined && { token: token.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-") }),
     },
     include: {
       transactions: { orderBy: { date: "desc" } },

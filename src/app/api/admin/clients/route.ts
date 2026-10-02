@@ -23,10 +23,21 @@ export async function POST(request: NextRequest) {
   if (denied) return denied;
 
   const body = await request.json();
-  const { name, email, company, totalCredits, startDate, endDate, gracePeriodDays } = body;
+  const { name, email, company, totalCredits, startDate, endDate, gracePeriodDays, token } = body;
 
   if (!name || !email || !company || !totalCredits || !startDate || !endDate) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  }
+
+  const slug = token
+    ? token.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-")
+    : generateClientToken();
+
+  if (token) {
+    const existing = await prisma.client.findUnique({ where: { token: slug } });
+    if (existing) {
+      return NextResponse.json({ error: "That URL slug is already in use" }, { status: 409 });
+    }
   }
 
   const client = await prisma.client.create({
@@ -34,7 +45,7 @@ export async function POST(request: NextRequest) {
       name,
       email,
       company,
-      token: generateClientToken(),
+      token: slug,
       totalCredits: Number(totalCredits),
       startDate: new Date(startDate),
       endDate: new Date(endDate),

@@ -4,7 +4,7 @@ import TransactionForm from "@/components/admin/TransactionForm";
 import TransactionList from "@/components/admin/TransactionList";
 import MilestoneForm from "@/components/admin/MilestoneForm";
 import MilestoneList from "@/components/admin/MilestoneList";
-import CopyLinkButton from "@/components/admin/CopyLinkButton";
+import ClientPortalLink from "@/components/admin/ClientPortalLink";
 import ClientEditForm from "@/components/admin/ClientEditForm";
 import { CreditBar } from "@/components/CreditBar";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -33,8 +33,6 @@ export default async function ClientDetailPage({
     new Date(client.endDate),
     client.gracePeriodDays
   );
-
-  const clientUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/client/${client.token}`;
 
   return (
     <div className="space-y-6">
@@ -93,17 +91,7 @@ export default async function ClientDetailPage({
       </div>
 
       {/* Shareable client link */}
-      <div className="bg-brand/5 border border-brand/20 rounded-xl p-4">
-        <p className="text-sm font-semibold text-brand-dark mb-2">
-          Client Portal Link
-        </p>
-        <div className="flex items-center gap-2">
-          <code className="text-xs text-gray-600 bg-white border border-gray-200 rounded-lg px-3 py-2 flex-1 truncate">
-            {clientUrl}
-          </code>
-          <CopyLinkButton url={clientUrl} />
-        </div>
-      </div>
+      <ClientPortalLink token={client.token} />
 
       {/* Edit client details */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
@@ -120,6 +108,7 @@ export default async function ClientDetailPage({
             startDate: client.startDate.toISOString().split("T")[0],
             endDate: client.endDate.toISOString().split("T")[0],
             gracePeriodDays: client.gracePeriodDays,
+            token: client.token,
           }}
         />
       </div>

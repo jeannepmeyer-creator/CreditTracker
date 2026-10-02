@@ -25,6 +25,7 @@ export default function ClientForm() {
         startDate: fd.get("startDate"),
         endDate: fd.get("endDate"),
         gracePeriodDays: 90,
+        token: fd.get("token") || undefined,
       }),
     });
 
@@ -64,6 +65,10 @@ export default function ClientForm() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
           <input name="endDate" type="date" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand" />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Portal URL Slug <span className="text-gray-400 font-normal">(optional — e.g. lgads or ktg-portal-2026)</span></label>
+          <input name="token" placeholder="Leave blank for auto-generated" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand font-mono" />
         </div>
       </div>
 
